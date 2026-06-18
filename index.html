@@ -30,7 +30,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
 .avatar.bot-av{background:#185FA5}
 .avatar.user-av{background:#378ADD}
 .avatar svg{width:15px;height:15px;fill:#fff}
-.bubble{padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.6;white-space:pre-wrap}
+.bubble{padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.6}
+.msg.bot .bubble{white-space:normal}
+.msg.user .bubble{white-space:pre-wrap}
+.resp-step{display:flex;gap:8px;margin:4px 0;align-items:flex-start}
+.resp-num{background:#185FA5;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0;margin-top:1px}
+.resp-bullet{display:flex;gap:8px;margin:3px 0;align-items:flex-start}
+.resp-dot{color:#185FA5;font-weight:700;flex-shrink:0}
+.resp-header{font-weight:600;color:#0C447C;margin:10px 0 4px;font-size:13px;text-transform:uppercase;letter-spacing:0.03em}
+.resp-gap{height:8px}
+.msg.bot .bubble strong{color:#0C447C}
 .msg.bot .bubble{background:#fff;border:0.5px solid #B5D4F4;border-top-left-radius:4px;color:#0C447C}
 .msg.user .bubble{background:#185FA5;color:#fff;border-top-right-radius:4px}
 .typing-dots{display:flex;gap:4px;align-items:center;padding:4px 2px}
@@ -116,24 +125,49 @@ const SP = `You are an internal assistant for Solutions & More, a full-service p
 EQUIPMENT BY DEPARTMENT:
 
 DIGITAL PRINTING:
-- Bizhub Press 1250p: B&W press, 125 ppm, 3M page monthly volume, inline finishing.
-- Accuriopress C6100: Color press, 100 ppm, up to 400 gsm, max 13x19.2" sheet, 1200x1200 dpi. Inline finishing: saddle stitch, perfect binding, ring binding, booklets. Best for high-quality color runs.
-- Accuriopress 4070: Color press, 3600x2400 dpi equivalent, up to 360 gsm, inline trimming.
-- Acuriopress 6136: B&W press, 136 ppm, 18,000-sheet capacity, 1200x1200 dpi.
-- Trojan Label T4: Label press with built-in laminator and semi-rotary die-cutting. 2-8.6" print width, 1600 dpi, 60 ft/min. High-volume label runs.
-- iJetColor 1175 (Printware): Full-color envelope press. Up to 7,810 envelopes/hour. Max 11.7" print width. CMYK pigment ink, fade/scratch/water resistant. Best for variable data short-run full-bleed envelopes.
-- Graphic Whizard GW8000: Numbering machine, 8,000 sheets/hour, up to 2 heads, 100 numbers per head, also perforates and scores.
+- 1250p B&W Machine (Bizhub Press 1250p): B&W press, 125 ppm, 3M page monthly volume, inline finishing.
+- C6100 Color Machine / Book Machine (Accuriopress C6100): Color press, 100 ppm, up to 400 gsm, max 13x19.2" sheet, 1200x1200 dpi. Inline finishing: saddle stitch, perfect binding, ring binding, booklets. Best for high-quality color runs and book production.
+- 4070 Color Machine / Flowsheet (Accuriopress 4070): Color press, 3600x2400 dpi equivalent, up to 360 gsm, inline trimming. Best for flowsheets and color jobs.
+- 6136 B&W Machine (Acuriopress 6136): B&W press, 136 ppm, 18,000-sheet capacity, 1200x1200 dpi.
+
+DIGITAL PRINT PRICING (8.5x11 on 20# white paper):
+Our cost per click: B&W = $0.04, Color = $0.015
+
+B&W Single-Sided retail:
+- 1-100: $0.25 each
+- 101-500: $0.15 each
+- 500+: $0.10 each
+
+B&W Double-Sided retail (per sheet, 2 clicks):
+- 1-100: $0.35 per sheet
+- 101-500: $0.25 per sheet
+- 500+: $0.15 per sheet
+
+Color Single-Sided retail:
+- 1-99: $0.75 each
+- 100+: $0.40 each
+- 500+: $0.30 each
+
+Color Double-Sided retail (per sheet, 2 clicks):
+- 1-100: $0.95 per sheet
+- 101-500: $0.80 per sheet
+- 500+: $0.65 per sheet
+
+All prices include 20# white paper. For specialty stock, premium paper, or larger sizes, check with manager for adjusted pricing. These prices apply to the 1250p, 6136 (B&W) and C6100, 4070 (Color).
+- T4 Roll Label Machine (Trojan Label T4): Label press with built-in laminator and semi-rotary die-cutting. 2-8.6" print width, 1600 dpi, 60 ft/min. High-volume label runs.
+- Ijetcolor Envelope Machine (iJetColor 1175 by Printware): Full-color envelope press. Up to 7,810 envelopes/hour. Max 11.7" print width. CMYK pigment ink, fade/scratch/water resistant. Best for variable data short-run full-bleed envelopes.
+- Graphic Whizard Numbering Machine (GW8000): Numbering machine, 8,000 sheets/hour, up to 2 heads, 100 numbers per head, also perforates and scores.
 
 PRODUCTION / BINDERY:
-- Champion Challenger Cutter: Paper cutter.
-- Polar 92E Cutter: Programmable paper cutter, 92cm (36.25") cutting width.
-- Baumfolder N05A: Paper hole puncher (x2 units).
-- Rollem: Perforating, scoring, slitting. Up to 18,000 sheets/hour. Min 4x4", max 42x25". Good for brochures, flyers, tent cards, menus, greeting cards.
-- Laminator GFP 563TH: 63" wide format roll laminator. Overlamination, mounting, board pre-coating. Film up to 10mil.
-- Colex Sharpcut FBC5x10: 5x10 ft digital flatbed cutter/router. Triple tool head, vision registration, vacuum bed. Tooling: router (acrylic, aluminum, rigid plastics), oscillating knife (Coroplast, foam board, honeycomb), creasing wheel (cardstock, corrugated), drag knife (vinyl, decals).
+- Challenger Paper Cutter (Champion Challenger): Paper cutter.
+- Polar Paper Cutter (Polar 92E): Programmable paper cutter, 92cm (36.25") cutting width.
+- Baumfolder 5 Hole Punch Machine and Baumfolder 3 Hole Punch Machine (Baumfolder N05A x2 units): Paper hole punchers.
+- Rollem Perfing Machine (Rollem E1291/438): Perforating, scoring, slitting. Up to 18,000 sheets/hour. Min 4x4", max 42x25". Good for brochures, flyers, tent cards, menus, greeting cards.
+- Large Format Laminator (GFP 563TH): 63" wide format roll laminator. Overlamination, mounting, board pre-coating. Film up to 10mil.
+- CNC Colex (Colex Sharpcut FBC5x10): 5x10 ft digital flatbed cutter/router. Triple tool head, vision registration, vacuum bed. Tooling: router (acrylic, aluminum, rigid plastics), oscillating knife (Coroplast, foam board, honeycomb), creasing wheel (cardstock, corrugated), drag knife (vinyl, decals).
 
 WIDE FORMAT / LARGE FORMAT:
-- EFI Pro 16H UV Flatbed: 65" wide hybrid UV flatbed. Prints rigid AND flexible: foam board, vinyl banners, stickers, acrylic, wood, ACM, styrene. CMYK + 2 white channels, up to 1200 dpi.
+- EFI Machine (EFI Pro 16H UV Flatbed): 65" wide hybrid UV flatbed. Prints rigid AND flexible: foam board, vinyl banners, stickers, acrylic, wood, ACM, styrene. CMYK + 2 white channels, up to 1200 dpi.
   DAILY MORNING STARTUP CHECKLIST (in order):
   1. Wake up the EFI machine
   2. Hold ink separator button for 3 seconds
@@ -148,17 +182,34 @@ WIDE FORMAT / LARGE FORMAT:
   11. Print test pattern and inspect quality
   12. Check alignment if needed
   13. Give Dee the nozzle check
-- AP Lazer SN4836: CO2 laser engraver/cutter. 48x36" area, 100W, max object height 33". Cuts/engraves wood, acrylic, and more.
-- Mutoh XpertJet 661UF: A2+ tabletop UV-LED flatbed. 19x23" print area, up to 5.91" thick. CMYK + White + Varnish. Best for ADA Braille signage, awards, plaques, phone cases, tumblers, golf balls, name badges, UV-DTF transfers.
+
+  WEEKLY MAINTENANCE CHECKLIST (every Friday):
+  1. Clean encoder strip
+  2. Inspect rails and lubrication
+  3. Clean anti-static bars
+  4. Clean media edge detector
+  5. Vacuum lamp fan filters
+
+  MONTHLY MAINTENANCE CHECKLIST (end of month):
+  1. Deep cleaning procedure
+  2. Clean rigid media fence
+  3. Clean all exterior fans
+  4. Clean inside PC using canned air
+  5. Clean E-chain and chain tray
+  6. Clean and remove dust and debris from all compartments
+  7. Clear Fiery Queue as needed
+  8. Review firmware and software updates
+- AP Lazer (SN4836): CO2 laser engraver/cutter. 48x36" area, 100W, max object height 33". Cuts/engraves wood, acrylic, and more.
+- Mutoh Machine (Mutoh XpertJet 661UF): A2+ tabletop UV-LED flatbed. 19x23" print area, up to 5.91" thick. CMYK + White + Varnish. Best for ADA Braille signage, awards, plaques, phone cases, tumblers, golf balls, name badges, UV-DTF transfers.
 
 EMBROIDERY:
-- Tajima S1890 (6-head, 15-needle): Up to 1,100 stitches/min. 450x360mm field per head. Cap embroidery (3.5x14" swing). USB/WiFi. Best for high-volume production.
-- Happy Japan HCS3 x2 (single-head, 12-needle): Up to 1,000 rpm. 285x290mm field. 3,000 design memory. Best for custom single pieces and smaller runs.
+- Tajima Embroidery Machine (Tajima S1890, 6-head, 15-needle): Up to 1,100 stitches/min. 450x360mm field per head. Cap embroidery (3.5x14" swing). USB/WiFi. Best for high-volume production.
+- Happy Japan Embroidery Machine (HCS3 x2, single-head, 12-needle): Up to 1,000 rpm. 285x290mm field. 3,000 design memory. Best for custom single pieces and smaller runs.
 
 DIRECT TO FILM (DTF):
-- DTF Station Prestige R2 Pro + Miro 13 Max: 13" DTF printer, dual Epson i1600 heads, 30-35 sq ft/hour. Cotton, polyester, PU - garments, tote bags, caps. Uses CMYKW ink + hot melt powder. Handle powder with gloves and mask.
-- DTF Station Aries 113 UV DTF: A3 UV DTF for hard surfaces. Prints AND laminates in one pass. Max 11.8" width. Outputs UV DTF stickers/transfers for cups, phone cases, etc.
-- Printomize Hyper Stamp Heat Press: 16x20" pneumatic heat press. Max 450F. Requires air compressor. Used to apply DTF transfers.
+- DTF Machine (DTF Station Prestige R2 Pro + Miro 13 Max): 13" DTF printer, dual Epson i1600 heads, 30-35 sq ft/hour. Cotton, polyester, PU - garments, tote bags, caps. Uses CMYKW ink + hot melt powder. Handle powder with gloves and mask.
+- UVDTF Machine (DTF Station Aries 113 UV DTF): A3 UV DTF for hard surfaces. Prints AND laminates in one pass. Max 11.8" width. Outputs UV DTF stickers/transfers for cups, phone cases, etc.
+- Heat Press Machine (Printomize Hyper Stamp): 16x20" pneumatic heat press. Max 450F. Requires air compressor. Used to apply DTF transfers.
 
 CUSTOMER SCENARIOS:
 1. ORDER STATUS: Look up in system first. Get status and give clear update with ETA. If delayed, be honest. If unclear, check with production before calling customer back.
@@ -251,11 +302,35 @@ const BI='<svg viewBox="0 0 24 24"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 
 const UI='<svg viewBox="0 0 24 24"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" fill="#fff"/></svg>';
 
 function scrollBottom(){msgEl.scrollTop=msgEl.scrollHeight;}
+function formatResponse(text){
+  // Escape HTML first
+  let t = text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  // Bold **text**
+  t = t.replace(/\*\*(.*?)\*\*/g,"<strong>$1</strong>");
+  // Numbered lists: lines starting with 1. 2. etc
+  t = t.replace(/^(\d+)\.\s+(.+)$/gm,"<div class='resp-step'><span class='resp-num'>$1</span><span>$2</span></div>");
+  // Bullet lines starting with - or *
+  t = t.replace(/^[-*]\s+(.+)$/gm,"<div class='resp-bullet'><span class='resp-dot'>•</span><span>$1</span></div>");
+  // Headers: lines ending with : that are short (section titles)
+  t = t.replace(/^([A-Z][^:
+]{2,40}:)$/gm,"<div class='resp-header'>$1</div>");
+  // Line breaks
+  t = t.replace(/
+{2,}/g,"<div class='resp-gap'></div>");
+  t = t.replace(/
+/g,"<br>");
+  return t;
+}
 function addMsg(role,text){
   const isUser=role==="user";
   const d=document.createElement("div");d.className="msg "+(isUser?"user":"bot");
   const av=document.createElement("div");av.className="avatar "+(isUser?"user-av":"bot-av");av.innerHTML=isUser?UI:BI;
-  const b=document.createElement("div");b.className="bubble";b.textContent=text;
+  const b=document.createElement("div");b.className="bubble";
+  if(isUser){
+    b.textContent=text;
+  } else {
+    b.innerHTML=formatResponse(text);
+  }
   d.appendChild(av);d.appendChild(b);msgEl.appendChild(d);scrollBottom();
 }
 function showTyping(){
