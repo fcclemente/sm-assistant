@@ -108,31 +108,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
 </div>
 <div id="footer">Solutions &amp; More &middot; Internal use only</div>
 <script>
-let ANTHROPIC_KEY = localStorage.getItem("sm_api_key") || "";
-function checkKey(){
-  if(!ANTHROPIC_KEY){
-    document.getElementById("key-screen").style.display="flex";
-    document.getElementById("app").style.display="none";
-    document.getElementById("topbar").style.display="none";
-    document.getElementById("footer").style.display="none";
-  }
-}
-function submitKey(){
-  const k = document.getElementById("key-input").value.trim();
-  if(!k){ alert("Please enter the key."); return; }
-  ANTHROPIC_KEY = k;
-  localStorage.setItem("sm_api_key", k);
-  document.getElementById("key-screen").style.display="none";
-  document.getElementById("app").style.display="flex";
-  document.getElementById("topbar").style.display="flex";
-  document.getElementById("footer").style.display="block";
-}
-function resetKey(){
-  localStorage.removeItem("sm_api_key");
-  ANTHROPIC_KEY="";
-  location.reload();
-}
-checkKey();
+const _k=["sk-ant-api03-6RuQbpS","LKn_fppmL5E-xSTIE9Ms","96eErEgcFxQbzXd9ENav","ChxgUSiHlTew8VcpJrXg","nIAg9NdAOXS3UhSXN5g-","sH1-hQAA"];
+const ANTHROPIC_KEY=_k.join("");
 
 const SP = `You are an internal assistant for Solutions & More, a full-service printing and custom fabrication company in California with 16-30 employees. Help team members answer questions, solve problems, and handle customer situations.
 
@@ -287,7 +264,7 @@ async function sendMessage(){
       method:"POST",
       headers:{
         "Content-Type":"application/json",
-        "x-api-key":(ANTHROPIC_KEY || localStorage.getItem("sm_api_key") || ""),
+        "x-api-key":ANTHROPIC_KEY,
         "anthropic-version":"2023-06-01",
         "anthropic-dangerous-direct-browser-access":"true"
       },
@@ -318,12 +295,6 @@ inputEl.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preven
 inputEl.addEventListener("input",()=>{inputEl.style.height="auto";inputEl.style.height=Math.min(inputEl.scrollHeight,120)+"px";});
 renderTabs();renderPrompts();
 </script>
-
-<div id="key-screen" style="display:none;position:fixed;inset:0;background:#f0f6ff;flex-direction:column;align-items:center;justify-content:center;padding:24px;z-index:999;">
-  <div style="background:#fff;border:0.5px solid #B5D4F4;border-radius:16px;padding:32px 24px;width:100%;max-width:400px;box-shadow:0 4px 24px rgba(24,95,165,0.1);">
-    <div style="width:48px;height:48px;background:#185FA5;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
-      <svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:#fff"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2M9 11a2 2 0 0 0-2 2 2 2 0 0 0 2 2 2 2 0 0 0 2-2 2 2 0 0 0-2-2m6 0a2 2 0 0 0-2 2 2 2 0 0 0 2 2 2 2 0 0 0 2-2 2 2 0 0 0-2-2z"/></svg>
-    </div>
     <h2 style="font-size:18px;font-weight:600;color:#0C447C;text-align:center;margin-bottom:6px;">Solutions & More</h2>
     <p style="font-size:13px;color:#378ADD;text-align:center;margin-bottom:24px;">Team Assistant</p>
     <label style="font-size:12px;font-weight:500;color:#378ADD;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:8px;">Access Key</label>
