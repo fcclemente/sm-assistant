@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Solutions & More — Project Tracker</title>
+<style>
+/*
+  ╔══════════════════════════════════════════════════╗
+  ║  ONLY ONE THING TO UPDATE:                       ║
+  ║  Replace PASTE-YOUR-SCRIPT-URL-HERE              ║
+  ║  with your Google Apps Script Web App URL        ║
+  ╚══════════════════════════════════════════════════╝
+*/
+:root{
+  --teal:#2196F3;--teal-dk:#1565C0;--teal-lt:#E3F2FD;
+  --text:#555555;--muted:#888780;--border:#D3D1C7;
+  --bg:#FAFAF8;--white:#FFFFFF;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:#555555;font-size:14px;}
+nav{background:var(--teal-dk);color:#fff;padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+.brand{font-size:16px;font-weight:700;}
+.brand span{opacity:.6;font-weight:400;font-size:13px;margin-left:8px;}
+main{max-width:1100px;margin:0 auto;padding:24px 20px;}
+.toolbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:20px;}
+.toolbar input{flex:1;min-width:200px;padding:8px 14px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);}
+.toolbar input:focus{outline:none;border-color:var(--teal);}
+.filter-sel{padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);cursor:pointer;}
+.btn{border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;}
+.btn-teal{background:var(--teal);color:#fff;}
+.btn-teal:hover{background:var(--teal-dk);}
+.btn-outline{background:var(--white);border:1px solid var(--border);}
+.btn-outline:hover{border-color:var(--teal);color:var(--teal);}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+.orders-list{display:flex;flex-direction:column;gap:10px;}
+.card{background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:border-color .15s;}
+.card:hover{border-color:#90CAF9;}
+.card.open{border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-lt);}
+.card-hdr{display:flex;align-items:center;gap:12px;padding:14px 18px;cursor:pointer;flex-wrap:wrap;}
+.oid{font-size:11px;font-weight:700;color:var(--teal-dk);background:var(--teal-lt);padding:3px 9px;border-radius:20px;white-space:nowrap;}
+.cname{font-weight:600;font-size:15px;flex:1;min-width:100px;}
+.jlbl{font-size:12px;color:var(--muted);}
+.card-rt{display:flex;align-items:center;gap:10px;margin-left:auto;flex-wrap:wrap;}
+.due{font-size:11px;color:var(--muted);}
+.due.late{color:#A32D2D;font-weight:600;}
+.chev{font-size:18px;color:var(--muted);transition:transform .2s;user-select:none;}
+.card.open .chev{transform:rotate(180deg);}
+.sbadge{font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap;}
+.s0{background:#E3F2FD;color:#1565C0;}.s1{background:#E6F1FB;color:#185FA5;}
+.s2{background:#FAEEDA;color:#854F0B;}.s3{background:#EAF3DE;color:#3B6D11;}
+.s4{background:#EEEDFE;color:#534AB7;}.s5{background:#FAECE7;color:#993C1D;}
+.s6{background:#F1EFE8;color:#5F5E5A;}
+.stage-track{display:flex;padding:14px 18px 0;overflow-x:auto;}
+.step{display:flex;flex-direction:column;align-items:center;flex:1;min-width:58px;position:relative;}
+.step:not(:last-child)::after{content:'';position:absolute;top:13px;left:50%;width:100%;height:2px;background:var(--border);z-index:0;}
+.step.done:not(:last-child)::after{background:var(--teal);}
+.dot{width:26px;height:26px;border-radius:50%;border:2px solid var(--border);background:var(--white);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--muted);position:relative;z-index:1;flex-shrink:0;}
+.step.done .dot{background:var(--teal);border-color:var(--teal);color:#fff;}
+.step.active .dot{border-color:var(--teal);color:var(--teal);box-shadow:0 0 0 3px var(--teal-lt);}
+.slbl{font-size:9px;color:var(--muted);margin-top:4px;text-align:center;line-height:1.3;max-width:62px;}
+.step.done .slbl,.step.active .slbl{color:var(--teal);font-weight:600;}
+.detail{padding:16px 18px 18px;border-top:1px solid var(--border);display:none;}
+.card.open .detail{display:block;}
+.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+@media(max-width:600px){.dgrid{grid-template-columns:1fr;}}
+.fg{display:flex;flex-direction:column;gap:4px;}
+.fg label{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px;}
+.fg select,.fg input[type=text]{padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);color:#555555;width:100%;}
+.fg select:focus,.fg input:focus{outline:none;border-color:var(--teal);}
+.arow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px;}
+.save-ok{font-size:12px;color:var(--teal);display:none;}
+.hist{margin-top:14px;border-top:1px solid var(--border);padding-top:12px;}
+.hist-ttl{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px;}
+.hi{display:flex;gap:10px;font-size:12px;margin-bottom:6px;}
+.hdot{width:6px;height:6px;border-radius:50%;background:var(--teal);margin-top:4px;flex-shrink:0;}
+.htxt{color:var(--muted);line-height:1.5;}
+.htxt strong{color:#555555;}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center;padding:20px;}
+.overlay.open{display:flex;}
+.modal{background:var(--white);border-radius:14px;padding:24px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;}
+.modal h2{font-size:16px;font-weight:700;margin-bottom:16px;}
+.mf{margin-bottom:12px;}
+.mf label{display:block;font-size:12px;color:var(--muted);font-weight:600;margin-bottom:4px;text-transform:uppercase;}
+.mf input,.mf select{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--white);}
+.mf input:focus{outline:none;border-color:var(--teal);}
+.mbtns{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;}
+.ebox{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px;font-size:12px;line-height:1.8;white-space:pre-wrap;color:#555555;font-family:'Segoe UI',Arial,sans-serif;margin-bottom:12px;max-height:320px;overflow-y:auto;}
+.copied{font-size:12px;color:var(--teal);display:none;margin-bottom:8px;}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--teal-dk);color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:999;display:none;box-shadow:0 4px 20px rgba(0,0,0,.2);}
+.toast.err{background:#A32D2D;}
+.toast.show{display:block;}
+.spinner{text-align:center;padding:48px;color:var(--muted);}
+.empty{text-align:center;padding:48px;color:var(--muted);}
+.tabs{display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid var(--border);}
+.tab{padding:9px 20px;font-size:13px;font-weight:500;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;}
+.tab.active{color:#2196F3;border-bottom-color:#2196F3;}
+.tab:hover{color:#2196F3;}
+.tab-badge{background:#2196F3;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px;margin-left:6px;}
+.ext-note-box{background:#FFF8E1;border:1px solid #FFE082;border-radius:8px;padding:10px 12px;font-size:12px;color:#5D4037;line-height:1.5;margin-top:8px;}
+.ext-note-label{font-size:10px;color:#888;font-weight:600;text-transform:uppercase;margin-bottom:4px;}
+.activity-log{margin-top:14px;border-top:0.5px solid var(--border);padding-top:12px;max-height:200px;overflow-y:auto;}
+.activity-title{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px;}
+.act-item{display:flex;gap:8px;font-size:11px;margin-bottom:6px;align-items:flex-start;}
+.act-dot{width:6px;height:6px;border-radius:50%;background:#2196F3;margin-top:3px;flex-shrink:0;}
+.act-text{color:var(--muted);line-height:1.5;flex:1;}
+.act-text strong{color:var(--text);}
+.act-time{font-size:10px;color:#aaa;white-space:nowrap;}
+.notes-section{margin-top:12px;border-top:0.5px solid var(--border);padding-top:12px;}
+.notes-title{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px;}
+.note-item{display:flex;gap:8px;align-items:flex-start;padding:8px 10px;background:#F5F5F5;border-radius:7px;margin-bottom:6px;font-size:12px;}
+.note-item-text{flex:1;color:#555;line-height:1.5;}
+.note-item-meta{font-size:10px;color:#aaa;white-space:nowrap;margin-top:2px;}
+.note-del{background:none;border:none;color:#e57373;cursor:pointer;font-size:14px;padding:0 4px;flex-shrink:0;}
+.note-del:hover{color:#c62828;}
+.add-note-row{display:flex;gap:8px;margin-top:8px;}
+.add-note-row input{flex:1;padding:7px 10px;border:0.5px solid var(--border);border-radius:7px;font-size:12px;background:var(--color-background-primary,#fff);color:#555;}
+.add-note-row button{background:#2196F3;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;}
+.btn-share{background:#fff;border:0.5px solid #2196F3;color:#2196F3;border-radius:7px;padding:6px 12px;font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:5px;}
+.btn-share:hover{background:#E3F2FD;}
+.files-section{margin-top:14px;border-top:0.5px solid var(--border);padding-top:12px;}
+.files-title{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:10px;}
+.file-row{display:flex;align-items:center;gap:10px;padding:7px 10px;background:#F5F5F5;border-radius:7px;margin-bottom:6px;font-size:12px;}
+.file-name{flex:1;color:var(--text);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.file-meta{font-size:11px;color:var(--muted);white-space:nowrap;}
+.file-actions{display:flex;gap:6px;flex-shrink:0;}
+.file-actions a{font-size:11px;color:#2196F3;text-decoration:none;padding:2px 7px;border:0.5px solid #2196F3;border-radius:5px;}
+.file-actions a:hover{background:#E3F2FD;}
+.file-del{font-size:11px;color:#c62828;background:none;border:0.5px solid #e57373;border-radius:5px;padding:2px 7px;cursor:pointer;}
+.upload-row{display:flex;gap:8px;align-items:center;margin-top:8px;}
+.upload-input{font-size:12px;flex:1;}
+.btn-upload{background:#2196F3;color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;}
+.btn-upload:disabled{opacity:.5;cursor:not-allowed;}
+.no-files{font-size:12px;color:var(--muted);font-style:italic;}
+.name-bar{display:flex;align-items:center;gap:10px;}
+.name-bar input{padding:5px 10px;border:1px solid rgba(255,255,255,.4);border-radius:6px;background:rgba(255,255,255,.15);color:#fff;font-size:13px;width:160px;}
+.name-bar input::placeholder{color:rgba(255,255,255,.6);}
+.name-bar input:focus{outline:none;background:rgba(255,255,255,.25);}
+</style>
+</head>
+<body>
+
+<script>
+// ╔══════════════════════════════════════════════════╗
+// ║  PASTE YOUR GOOGLE APPS SCRIPT URL BELOW         ║
+// ╚══════════════════════════════════════════════════╝
+var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyMcIsNsBaZu0RKdKxbVy3i0XS6tyakWw8EJQSYVn0y_Vytzm2WP3Y3XonXP8kvMz0T3Q/exec";
+// ════════════════════════════════════════════════════
+
+var orders     = [];
+var openCardId = null;
+var staffName  = localStorage.getItem("sm_staff") || "";
+
+var STAGES = [
+  "Order Received","In Design/Proof","Awaiting Approval",
+  "In Production","Quality Check","Ready for Pickup/Shipping","Completed"
+];
+var STAGE_MSGS = [
+  "We have received your order and it is now in our system. We will be in touch shortly with any questions.",
+  "Our design team has started working on your proof. You will receive a preview for your review soon.",
+  "Your proof is ready and awaiting your approval. Please review and let us know if you would like any changes.",
+  "Great news — your order is now in production. We are working hard to get it done right.",
+  "Your order has passed production and is going through our quality check.",
+  "Your order is ready! Please come pick it up, or it is being prepared for shipping.",
+  "Your order is complete. Thank you for choosing Solutions & More!"
+];
+
+// ── API calls (JSONP for GET, fetch for POST) ─────────────────────────────────
+function api(params) {
+  return new Promise(function(resolve, reject) {
+    var cbName = "cb_" + Math.random().toString(36).slice(2);
+    var script = document.createElement("script");
+    params.callback = cbName;
+    var qs = Object.keys(params).map(function(k){
+      return encodeURIComponent(k) + "=" + encodeURIComponent(params[k]);
+    }).join("&");
+    window[cbName] = function(data) {
+      delete window[cbName];
+      document.body.removeChild(script);
+      resolve(data);
+    };
+    script.onerror = function() {
+      delete window[cbName];
+      document.body.removeChild(script);
+      reject(new Error("Script load failed"));
+    };
+    script.src = SCRIPT_URL + "?" + qs;
+    document.body.appendChild(script);
+  });
+}
+
+function apiPost(data) {
+  return fetch(SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    body: JSON.stringify(data)
+  }).then(function() {
+    return {success: true};
+  });
+}
+
+// ── Load orders ───────────────────────────────────────────────────────────────
+function loadOrders() {
+  document.getElementById("ordersList").innerHTML = '<div class="spinner">Loading orders…</div>';
+  api({action:"getOrders"}).then(function(data) {
+    orders = data.orders || [];
+    renderOrders();
+    showToast("Orders loaded ✓");
+  }).catch(function(e) {
+    showToast("Could not connect. Check your Script URL.", true);
+    document.getElementById("ordersList").innerHTML = '<div class="empty">Could not load orders.<br>Check that your Script URL is set and redeployed.</div>';
+  });
+}
+
+// ── Create order ──────────────────────────────────────────────────────────────
+function createOrder() {
+  var orderId = document.getElementById("f-orderid").value.trim();
+  var client  = document.getElementById("f-client").value.trim();
+  var email   = document.getElementById("f-email").value.trim();
+  var job     = document.getElementById("f-job").value.trim();
+  var due     = document.getElementById("f-due").value;
+  if (!orderId) { showToast("Order ID is required.", true); return; }
+  if (!client || !job) { showToast("Client name and job are required.", true); return; }
+  var btn = document.querySelector("#addModal .btn-teal");
+  btn.disabled = true; btn.textContent = "Creating…";
+  apiPost({
+    action:"createOrder", orderId:orderId, client:client, email:email,
+    job:job, due:due, staff: staffName || "Team"
+  }).then(function(r) {
+    if (r.success) {
+      closeModal("addModal");
+      ["f-orderid","f-client","f-email","f-job","f-due"].forEach(function(id){ document.getElementById(id).value=""; });
+      showToast("Order created ✓");
+      loadOrders();
+    } else { showToast("Error: " + r.error, true); }
+  }).catch(function(){ showToast("Connection error.", true); })
+  .finally(function(){ btn.disabled=false; btn.textContent="Create Order"; });
+}
+
+// ── Update stage ──────────────────────────────────────────────────────────────
+function updateStage(orderId) {
+  var order = orders.find(function(o){ return o.id === orderId; });
+  var sel   = document.getElementById("sel-" + orderId);
+  var note  = document.getElementById("note-" + orderId);
+  var btn   = document.getElementById("save-" + orderId);
+  var stat  = document.getElementById("stat-" + orderId);
+  var newStage = sel.value;
+  var noteVal  = note ? note.value.trim() : "";
+  btn.disabled = true; btn.textContent = "Saving…";
+  var dueInput    = document.getElementById("due-" + orderId);
+  var extNoteInput = document.getElementById("extnote-" + orderId);
+  var dueVal      = dueInput ? dueInput.value : order.due;
+  var extNoteVal  = extNoteInput ? extNoteInput.value.trim() : (order.extNote || "");
+  apiPost({
+    action:"updateOrder", id: orderId,
+    stage: newStage, notes: noteVal,
+    extNote: extNoteVal,
+    due: dueVal,
+    staff: staffName || "Team"
+  }).then(function() {
+    order.stage     = newStage;
+    order.notes     = noteVal;
+    order.extNote   = extNoteVal;
+    order.due       = dueVal;
+    order.updatedBy = staffName || "Team";
+    order.updated   = new Date().toLocaleDateString("en-US");
+    stat.style.display = "inline";
+    stat.textContent   = "✓ Saved";
+    setTimeout(function(){ stat.style.display="none"; btn.disabled=false; btn.textContent="Save Update"; }, 2500);
+    renderOrders();
+    showToast("Stage updated ✓");
+  }).catch(function(){ showToast("Connection error.", true); btn.disabled=false; btn.textContent="Save Update"; });
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function sIdx(stage){ var i=STAGES.indexOf(stage); return i<0?0:i; }
+function sCls(stage){ return "s"+Math.min(sIdx(stage),6); }
+
+function renderOrders() {
+  var q   = (document.getElementById("searchBox").value||"").toLowerCase();
+  var fil = document.getElementById("stageFilter").value;
+  var list = document.getElementById("ordersList");
+  var active  = orders.filter(function(o){ return o.stage !== "Completed"; });
+  var archive = orders.filter(function(o){ return o.stage === "Completed"; });
+  document.getElementById("badge-active").textContent  = active.length;
+  document.getElementById("badge-archive").textContent = archive.length;
+  var pool = currentTab === 'archive' ? archive : active;
+  var filtered = pool.filter(function(o){
+    return (o.client.toLowerCase().indexOf(q)>-1 || o.id.toLowerCase().indexOf(q)>-1)
+        && (!fil || o.stage===fil);
+  });
+  if (!filtered.length) { list.innerHTML='<div class="empty">No orders found.</div>'; return; }
+  list.innerHTML = filtered.map(function(o) {
+    var si    = sIdx(o.stage);
+    var isOpen = openCardId === o.id;
+    var dueStr = "—";
+    if (o.due) {
+      try {
+        var dp = o.due.split("-");
+        var dd = new Date(parseInt(dp[0]), parseInt(dp[1])-1, parseInt(dp[2]));
+        dueStr = dd.toLocaleDateString("en-US",{month:"short",day:"numeric"});
+      } catch(e) {}
+    }
+    var late = false;
+    if (o.due && o.stage !== "Completed") {
+      var lp = o.due.split("-");
+      var ld = new Date(parseInt(lp[0]), parseInt(lp[1])-1, parseInt(lp[2]));
+      late = ld < new Date();
+    }
+    return '<div class="card'+(isOpen?" open":"")+'" id="card-'+o.id+'">' +
+      '<div class="card-hdr" onclick="toggleCard(\''+o.id+'\')">'+
+        '<span class="oid">'+o.id+'</span>'+
+        '<span class="cname">'+o.client+'</span>'+
+        '<span class="jlbl">'+o.job+'</span>'+
+        '<div class="card-rt">'+
+          '<span class="sbadge '+sCls(o.stage)+'">'+o.stage+'</span>'+
+          '<span class="due'+(late?" late":"")+'">Due '+dueStr+(late?" ⚠":"")+' </span>'+
+          '<span class="chev">⌄</span>'+
+        '</div>'+
+      '</div>'+
+      '<div class="stage-track">'+
+        STAGES.map(function(s,i){
+          return '<div class="step'+(i<si?" done":"")+(i===si?" active":"")+'">' +
+            '<div class="dot">'+(i<si?"✓":(i+1))+'</div>'+
+            '<div class="slbl">'+s+'</div></div>';
+        }).join("")+
+      '</div>'+
+      '<div class="detail">'+
+        '<div class="dgrid">'+
+          '<div class="fg"><label>Update Stage</label>'+
+            '<select id="sel-'+o.id+'">'+
+              STAGES.map(function(s){ return '<option'+(s===o.stage?' selected':'')+'>'+s+'</option>'; }).join("")+
+            '</select></div>'+
+          '<div class="fg"><label>Due Date</label>'+
+            '<input type="date" id="due-'+o.id+'" value="'+(o.due||"")+'" /></div>'+
+          '<div class="fg"><label>Internal Note (team only)</label>'+
+            '<input type="text" id="note-'+o.id+'" placeholder="Add a note to this update…" /></div>'+
+          '<div class="fg" style="grid-column:1/-1"><label>Client Note (visible to client)</label>'+
+            '<input type="text" id="extnote-'+o.id+'" placeholder="Message for the client…" value="'+(o.extNote||"").replace(/"/g,"&quot;")+'" /></div>'+
+        '</div>'+
+        (o.extNote ? '<div class="ext-note-box"><div class="ext-note-label">Client Message</div>'+o.extNote+'</div>' : '')+
+        '<div class="arow">'+
+          '<button class="btn btn-teal" id="save-'+o.id+'" onclick="updateStage(\''+o.id+'\')">Save Update</button>'+
+          '<button class="btn btn-outline" onclick="openEmailModal(\''+o.id+'\')">✉ Email Client</button>'+
+          '<button class="btn btn-outline" style="color:#A32D2D;border-color:#A32D2D;" onclick="confirmDelete(\''+o.id+'\',\''+o.client+'\')">🗑 Delete</button>'+
+          '<span class="save-ok" id="stat-'+o.id+'"></span>'+
+        '</div>'+
+        (o.updatedBy?'<p style="font-size:11px;color:var(--muted);margin-top:10px;">Last updated by <strong>'+o.updatedBy+'</strong> on '+o.updated+'</p>':'')+
+        '<div class="activity-log" id="actlog-'+o.id+'">'+
+          '<div class="activity-title">Activity Log</div>'+
+          '<div class="act-item"><div class="act-dot"></div><div class="act-text"><strong>'+o.stage+'</strong>'+(o.notes?' — '+o.notes:'')+'</div><span class="act-time">'+o.updated+'</span></div>'+
+        '</div>'+
+        '<div class="files-section" id="files-'+o.id+'">'+
+          '<div class="files-title">Files & Documents</div>'+
+          '<div id="filelist-'+o.id+'"><div class="no-files">Loading files...</div></div>'+
+          '<div class="upload-row">'+
+            '<input type="file" class="upload-input" id="fileInput-'+o.id+'" multiple />'+
+            '<button class="btn-upload" id="uploadBtn-'+o.id+'" onclick="uploadFiles(this)" data-orderid="'+o.id+'">Upload</button>'+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  }).join("");
+}
+
+var currentTab = 'active';
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById('tab-active').className  = 'tab' + (tab==='active'  ? ' active' : '');
+  document.getElementById('tab-archive').className = 'tab' + (tab==='archive' ? ' active' : '');
+  openCardId = null;
+  renderOrders();
+}
+
+function toggleCard(id){
+  openCardId = openCardId===id ? null : id;
+  renderOrders();
+  if (openCardId) {
+    loadFiles(openCardId);
+    loadActivityLog(openCardId);
+    loadNotes(openCardId);
+  }
+}
+
+function loadActivityLog(orderId) {
+  var el = document.getElementById('actlog-' + orderId);
+  if (!el) return;
+  api({action:'getActivityLog', orderId: orderId}).then(function(d) {
+    var log = d.log || [];
+    if (!log.length) return;
+    el.innerHTML = '<div class="activity-title">Activity Log</div>' +
+      log.map(function(e) {
+        return '<div class="act-item"><div class="act-dot"></div>' +
+          '<div class="act-text"><strong>' + e.action + '</strong>' + (e.note ? ' — ' + e.note : '') + ' <span style="font-size:10px;color:#888">by ' + e.staff + '</span></div>' +
+          '<span class="act-time">' + e.time + '</span></div>';
+      }).join('');
+  }).catch(function(){});
+}
+
+// ── Email modal ───────────────────────────────────────────────────────────────
+function openEmailModal(orderId) {
+  var o  = orders.find(function(x){ return x.id===orderId; });
+  var si = sIdx(o.stage);
+  var statusUrl = SCRIPT_URL + "?action=statusPage";
+  var subject = "Order Update - " + o.id + " | " + o.job;
+  var body =
+    "Hi there,\n\n" +
+    "Here is your latest update from Solutions & More.\n\n" +
+    "Order ID:  " + o.id + "\n" +
+    "Job:       " + o.job + "\n" +
+    "Status:    " + o.stage + "\n\n" +
+    STAGE_MSGS[si] + "\n\n" +
+    "Track your order status here:\n" + statusUrl + "\n\n" +
+    "Use your Order ID (" + o.id + ") to look up your status anytime.\n\n" +
+    "Questions? Reply to this email or give us a call.\n\n" +
+    "Thank you,\nCustomer Service Team\ncustomerservice@solutionsandmore.com";
+  var mailto = "mailto:" + encodeURIComponent(o.email) +
+    "?subject=" + encodeURIComponent(subject) +
+    "&body="    + encodeURIComponent(body);
+  window.location.href = mailto;
+}
+
+function copyEmail() {
+  navigator.clipboard.writeText(document.getElementById("emailBodyBox").textContent).then(function(){
+    document.getElementById("copiedNote").style.display = "block";
+  });
+}
+
+function openAddModal(){ document.getElementById("addModal").classList.add("open"); }
+function closeModal(id){ document.getElementById(id).classList.remove("open"); }
+
+function saveName() {
+  staffName = document.getElementById("staffInput").value.trim();
+  localStorage.setItem("sm_staff", staffName);
+  showToast("Name saved ✓");
+}
+
+var toastTimer;
+function showToast(msg, isErr) {
+  var t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = "toast show" + (isErr?" err":"");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ t.className="toast"; }, 3000);
+}
+
+function confirmDelete(orderId, clientName) {
+  if (!confirm("Delete order " + orderId + " for " + clientName + "?\n\nThis cannot be undone.")) return;
+  apiPost({action:"deleteOrder", id: orderId, staff: staffName || "Team"})
+    .then(function(r) {
+      if (r.success) { showToast("Order deleted ✓"); openCardId = null; loadOrders(); }
+      else showToast("Error: " + r.error, true);
+    }).catch(function(){ showToast("Connection error.", true); });
+}
+
+// ── File functions ────────────────────────────────────────────────────────────
+function loadFiles(orderId) {
+  var el = document.getElementById("filelist-" + orderId);
+  if (!el) return;
+  el.innerHTML = '<div class="no-files">Loading...</div>';
+  fetch(SCRIPT_URL + "?action=getFiles&orderId=" + encodeURIComponent(orderId))
+    .then(function(r){ return r.json(); })
+    .then(function(d){ renderFiles(orderId, d.files || []); })
+    .catch(function(){ el.innerHTML = '<div class="no-files">Could not load files.</div>'; });
+}
+
+function renderFiles(orderId, files) {
+  var el = document.getElementById("filelist-" + orderId);
+  if (!el) return;
+  if (!files.length) { el.innerHTML = '<div class="no-files">No files uploaded yet.</div>'; return; }
+  el.innerHTML = files.map(function(f) {
+    return '<div class="file-row">' +
+      '<span class="file-name" title="'+f.name+'">'+f.name+'</span>' +
+      '<span class="file-meta">'+f.size+' &middot; '+f.date+'</span>' +
+      '<div class="file-actions">' +
+        '<a href="'+f.viewUrl+'" target="_blank">View</a>' +
+        '<a href="'+f.url+'" target="_blank">Download</a>' +
+        '<button class="file-del" data-order="'+orderId+'" data-file="'+f.id+'" onclick="removeFile(this)">Remove</button>' +
+      '</div>' +
+    '</div>';
+  }).join("");
+}
+
+function uploadFiles(btnEl) {
+  var orderId = btnEl.getAttribute("data-orderid");
+  var input = document.getElementById("fileInput-" + orderId);
+  var btn   = document.getElementById("uploadBtn-" + orderId);
+  if (!input || !input.files.length) { showToast("Select a file first.", true); return; }
+  btn.disabled = true; btn.textContent = "Uploading...";
+  var files   = Array.from(input.files);
+  var pending = files.length;
+  files.forEach(function(file) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var base64 = e.target.result.split(",")[1];
+      apiPost({
+        action:   "uploadFile",
+        orderId:  orderId,
+        fileName: file.name,
+        mimeType: file.type || "application/octet-stream",
+        fileData: base64
+      }).then(function(r) {
+        pending--;
+        if (pending === 0) {
+          btn.disabled = false; btn.textContent = "Upload";
+          input.value = "";
+          showToast("File uploaded ✓");
+          loadFiles(orderId);
+        }
+      }).catch(function(){
+        pending--;
+        if (pending === 0) { btn.disabled = false; btn.textContent = "Upload"; }
+        showToast("Upload failed.", true);
+      });
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function removeFile(btnEl) {
+  var orderId = btnEl.getAttribute("data-order");
+  var fileId  = btnEl.getAttribute("data-file");
+  if (!confirm("Remove this file?")) return;
+  apiPost({action: "deleteFile", fileId: fileId})
+    .then(function(r) {
+      if (r.success) { showToast("File removed ✓"); loadFiles(orderId); }
+      else showToast("Error: " + r.error, true);
+    });
+}
+
+// ── Notes ────────────────────────────────────────────────────────────────────
+function loadNotes(orderId) {
+  var el = document.getElementById("noteslist-" + orderId);
+  if (!el) return;
+  api({action: "getNotes", orderId: orderId}).then(function(d) {
+    renderNotes(orderId, d.notes || []);
+  }).catch(function(){ el.innerHTML = '<div style="font-size:12px;color:#aaa;">Could not load notes.</div>'; });
+}
+
+function renderNotes(orderId, notes) {
+  var el = document.getElementById("noteslist-" + orderId);
+  if (!el) return;
+  if (!notes.length) { el.innerHTML = '<div style="font-size:12px;color:#aaa;font-style:italic;">No notes yet.</div>'; return; }
+  el.innerHTML = notes.map(function(n) {
+    return '<div class="note-item">' +
+      '<div style="flex:1">' +
+        '<div class="note-item-text">' + n.text + '</div>' +
+        '<div class="note-item-meta">' + n.staff + ' &middot; ' + n.time + '</div>' +
+      '</div>' +
+      '<button class="note-del" data-order="'+orderId+'" data-note="'+n.id+'" onclick="deleteNote(this)" title="Delete note">✕</button>' +
+    '</div>';
+  }).join("");
+}
+
+function addNote(orderId) {
+  var input = document.getElementById("newnote-" + orderId);
+  var text  = input ? input.value.trim() : "";
+  if (!text) { showToast("Type a note first.", true); return; }
+  apiPost({
+    action:  "addNote",
+    orderId: orderId,
+    text:    text,
+    staff:   staffName || "Team"
+  }).then(function() {
+    input.value = "";
+    showToast("Note added ✓");
+    loadNotes(orderId);
+  }).catch(function(){ showToast("Error adding note.", true); });
+}
+
+function deleteNote(btnEl) {
+  var orderId = btnEl.getAttribute("data-order");
+  var noteId  = btnEl.getAttribute("data-note");
+  if (!confirm("Delete this note?")) return;
+  apiPost({action: "deleteNote", orderId: orderId, noteId: noteId})
+    .then(function() { showToast("Note deleted ✓"); loadNotes(orderId); })
+    .catch(function(){ showToast("Error deleting note.", true); });
+}
+
+// ── Share client link ─────────────────────────────────────────────────────────
+function shareClientLink(orderId) {
+  var link = SCRIPT_URL + "?action=statusPage&orderId=" + encodeURIComponent(orderId);
+  navigator.clipboard.writeText(link).then(function() {
+    showToast("Client link copied ✓ — paste it in your email!");
+  }).catch(function() {
+    prompt("Copy this link and send to your client:", link);
+  });
+}
+
+window.onload = function() {
+  document.getElementById("staffInput").value = staffName;
+  if (SCRIPT_URL === "PASTE-YOUR-SCRIPT-URL-HERE") {
+    document.getElementById("ordersList").innerHTML = '<div class="empty">⚠️ Open this file in a text editor and replace<br><strong>PASTE-YOUR-SCRIPT-URL-HERE</strong><br>with your Google Apps Script URL.<br><br>See the setup instructions below.</div>';
+    return;
+  }
+  loadOrders();
+};
+</script>
+
+<nav>
+  <div class="brand">Solutions & More <span>Project Tracker</span></div>
+  <div class="name-bar">
+    <input id="staffInput" placeholder="Your name…" />
+    <button class="btn btn-outline" style="color:#fff;border-color:rgba(255,255,255,.4);background:rgba(255,255,255,.15);" onclick="saveName()">Save</button>
+  </div>
+</nav>
+
+<main>
+  <div class="tabs">
+    <div class="tab active" id="tab-active" onclick="switchTab('active')">Active Orders <span class="tab-badge" id="badge-active">0</span></div>
+    <div class="tab" id="tab-archive" onclick="switchTab('archive')">Archive <span class="tab-badge" id="badge-archive" style="background:#888;">0</span></div>
+  </div>
+  <div class="toolbar">
+    <input type="text" id="searchBox" placeholder="Search by client or order ID…" oninput="renderOrders()" />
+    <select class="filter-sel" id="stageFilter" onchange="renderOrders()">
+      <option value="">All Stages</option>
+      <option>Order Received</option>
+      <option>In Design/Proof</option>
+      <option>Awaiting Approval</option>
+      <option>In Production</option>
+      <option>Quality Check</option>
+      <option>Ready for Pickup/Shipping</option>
+    </select>
+    <button class="btn btn-outline" onclick="loadOrders()">↻ Refresh</button>
+    <button class="btn btn-teal" onclick="openAddModal()">+ New Order</button>
+  </div>
+  <div class="orders-list" id="ordersList"></div>
+</main>
+
+<!-- Add Order -->
+<div class="overlay" id="addModal">
+  <div class="modal">
+    <h2>New Order</h2>
+    <div class="mf"><label>Order ID</label><input id="f-orderid" placeholder="e.g. SM-1041, INV-205, JOB-88" /></div>
+    <div class="mf"><label>Client Name</label><input id="f-client" placeholder="e.g. Acme Corp" /></div>
+    <div class="mf"><label>Client Email</label><input id="f-email" type="email" placeholder="client@email.com" /></div>
+    <div class="mf"><label>Job Type / Description</label><input id="f-job" placeholder="e.g. Business Cards 500x, Banner 4x8" /></div>
+    <div class="mf"><label>Due Date</label><input id="f-due" type="date" /></div>
+    <div class="mbtns">
+      <button class="btn btn-outline" onclick="closeModal('addModal')">Cancel</button>
+      <button class="btn btn-teal" onclick="createOrder()">Create Order</button>
+    </div>
+  </div>
+</div>
+
+<!-- Email -->
+<div class="overlay" id="emailModal">
+  <div class="modal">
+    <h2 id="emailModalTitle">Notify Client</h2>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">Review and copy — send from your own inbox.</p>
+    <div class="ebox" id="emailBodyBox"></div>
+    <div class="copied" id="copiedNote">✓ Copied to clipboard!</div>
+    <div class="mbtns">
+      <button class="btn btn-outline" onclick="closeModal('emailModal')">Close</button>
+      <button class="btn btn-teal" onclick="copyEmail()">Copy Email</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+</body>
+</html>
